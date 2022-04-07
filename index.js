@@ -12,7 +12,8 @@ app.use(
 )
 
 app.get('/', (request, response) => {
-  db.dumpLinks
+    console.log("REQUEST HIT /");
+    db.dumpLinks
 })
 
 app.listen(port, () => {
