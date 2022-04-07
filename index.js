@@ -20,7 +20,7 @@ app.get('/dump', (request, response) => {
     return db.dumpLinks(request, response)
 })
 
-app.get('/getLinks', (request, response) => {
+app.post('/getLinks', (request, response) => {
     let query = request.body
     return response.status(200).json(query)
 })
