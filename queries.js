@@ -4,7 +4,7 @@ const pool = new Pool({
   host: process.env.host,
   database: process.env.database,
   password: process.env.password,
-  port: process.env.port,
+  port: process.env.database_port,
 })
 
 const dumpLinks = (request, response) => {
