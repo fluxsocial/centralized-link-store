@@ -4,12 +4,12 @@ const app = express()
 const db = require('./queries')
 const port = 3000
 
-app.use(bodyParser.json())
 app.use(
   bodyParser.urlencoded({
     extended: true,
   })
 )
+app.use(express.json());
 
 app.get('/', (request, response) => {
     console.log("REQUEST HIT /");
@@ -18,6 +18,11 @@ app.get('/', (request, response) => {
 
 app.get('/dump', (request, response) => {
     return db.dumpLinks(request, response)
+})
+
+app.get('/getLinks', (request, response) => {
+    let query = request.body
+    return response.status(200).json(query)
 })
 
 app.listen(port, () => {
