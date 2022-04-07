@@ -13,7 +13,11 @@ app.use(
 
 app.get('/', (request, response) => {
     console.log("REQUEST HIT /");
-    return db.dumpLinks
+    return response.status(200).json({"status": "ok"})
+})
+
+app.get('/dump', (request, response) => {
+    return db.dumpLinks(request, response)
 })
 
 app.listen(port, () => {
