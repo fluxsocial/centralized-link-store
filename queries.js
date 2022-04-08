@@ -16,17 +16,41 @@ const dumpLinks = (request, response) => {
   })
 }
 
-const addLink = (source, predicate, target, graph, timestamp, linkExpression) => {
+const addLink = (linkExpression) => {
   delete linkExpression["graph"];
   pool.query(`INSERT INTO ${process.env.table}(source, predicate, target, graph, timestamp, link_expression) VALUES ($1, $2, $3, $4, $5, $6)`, 
     [
-      source, 
-      predicate, 
-      target, 
-      graph, 
-      timestamp,
+      linkExpression["data"]["source"],
+      linkExpression["data"]["predicate"],
+      linkExpression["data"]["target"],
+      linkExpression["graph"],
+      linkExpression["timestamp"],
       linkExpression
     ])
+}
+
+const removeLink = async (linkExpression) => {
+  let predicate;
+  if (!linkExpression["data"]["predicate"]) {
+    let queryValues = [
+      linkExpression["data"]["source"],
+      linkExpression["data"]["target"],
+      linkExpression["graph"],
+      linkExpression["timestamp"],
+      linkExpression["author"]
+    ];
+    await pool.query(`DELETE FROM ${process.env.table} WHERE source = ($1) AND target = ($2) AND graph = ($3) AND timestamp = ($4) AND link_expression ->> 'author' = ($5)`, queryValues)
+  } else {
+    let queryValues = [
+      linkExpression["data"]["source"],
+      predicate,
+      linkExpression["data"]["target"],
+      linkExpression["graph"],
+      linkExpression["timestamp"],
+      linkExpression["author"]
+    ];
+    await pool.query(`DELETE FROM ${process.env.table} WHERE source = ($1) AND predicate = ($2) AND target = ($3) AND graph = ($4) AND timestamp = ($5) AND link_expression ->> 'author' = ($6)`, queryValues)
+  }
 }
 
 // Source queries
@@ -69,6 +93,7 @@ const queryLinksTarget = async (graph, target) => {
 module.exports = {
   dumpLinks,
   addLink,
+  removeLink,
   queryLinksSource,
   queryLinksPredicate,
   queryLinksTarget,

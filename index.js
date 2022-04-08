@@ -2,6 +2,7 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const app = express()
 const db = require('./queries')
+const utils = require('./utils')
 const port = 3000
 
 app.use(
@@ -89,28 +90,22 @@ app.post('/getLinks', async (request, response) => {
 
 app.post('/addLink', (request, response) => {
     let link = request.body;
-    //Check LinkExpression
-    if (!link["data"]) {
-        return response.status(400).json({"error": "LinkExpression should have a data field"})
+    let validate = utils.validateLinkData(link);
+    if (validate != true) {
+        return response.status(400).json(validate)
     }
-    if (!link["author"]) {
-        return response.status(400).json({"error": "LinkExpression should have an author field"})
-    }
-    if (!link["timestamp"]) {
-        return response.status(400).json({"error": "LinkExpression should have a timestamp field"})
-    }
-    if (!link["graph"]) {
-        return response.status(400).json({"error": "LinkExpression should have a graph field"})
-    }
-    //Check LinkData
-    if (!link["data"]["source"]) {
-        return response.status(400).json({"error": "LinkExpression data should have a source field"})
-    }
-    if (!link["data"]["target"]) {
-        return response.status(400).json({"error": "LinkExpression data should have a target field"})
-    }
-    db.addLink(link["data"]["source"], link["data"]["predicate"], link["data"]["target"], link["graph"], link["timestamp"], link)
+    db.addLink(link)
     return response.status(200).json({"status": "Link Added"})
+})
+
+app.post('/removeLink', async (request, response) => {
+    let link = request.body;
+    let validate = utils.validateLinkData(link);
+    if (validate != true) {
+        return response.status(400).json(validate)
+    }
+    await db.removeLink(link)
+    return response.status(200).json({"status": "Link Removed"})
 })
 
 app.listen(port, () => {
