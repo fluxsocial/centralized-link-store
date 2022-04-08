@@ -1,16 +1,28 @@
 const express = require('express')
 const bodyParser = require('body-parser')
-const app = express()
 const db = require('./queries')
 const utils = require('./utils')
+const websockets = require('./websocket')
+
 const port = 3000
 
+const app = express()
 app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
+    bodyParser.urlencoded({
+      extended: true,
+    })
+  )
 app.use(express.json());
+
+const server = app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}\n\n`);
+});
+
+websockets.websocket(server);
+
+process.on("message", (message) => {
+    console.log(message);
+});
 
 app.get('/', (request, response) => {
     console.log("REQUEST HIT /");
@@ -22,6 +34,7 @@ app.get('/dump', (request, response) => {
 })
 
 app.post('/getLinks', async (request, response) => {
+    console.log("GetLinks link request");
     let query = request.body;
     if (!query["graph"]) {
         return response.status(400).json({"error": "Query should have a graph field"})
@@ -89,16 +102,22 @@ app.post('/getLinks', async (request, response) => {
 })
 
 app.post('/addLink', (request, response) => {
+    console.log("Add link request");
     let link = request.body;
     let validate = utils.validateLinkData(link);
     if (validate != true) {
         return response.status(400).json(validate)
     }
-    db.addLink(link)
+    let signalConnections = websockets.connections.filter(connection => connection.graph === link["graph"])
+    db.addLink(link);
+    signalConnections.forEach(connection => {
+        connection["connection"].send(JSON.stringify(link));
+    })
     return response.status(200).json({"status": "Link Added"})
 })
 
 app.post('/removeLink', async (request, response) => {
+    console.log("Remove link request");
     let link = request.body;
     let validate = utils.validateLinkData(link);
     if (validate != true) {
@@ -106,8 +125,4 @@ app.post('/removeLink', async (request, response) => {
     }
     await db.removeLink(link)
     return response.status(200).json({"status": "Link Removed"})
-})
-
-app.listen(port, () => {
-  console.log(`App running on port ${port}.`);
 })
