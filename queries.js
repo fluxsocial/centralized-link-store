@@ -53,6 +53,11 @@ const removeLink = async (linkExpression) => {
   }
 }
 
+const getLinksForGraph = async (graph) => {
+  const res = await pool.query(`SELECT * FROM ${process.env.table} WHERE graph = ($1)`, [graph])
+  return res.rows;
+}
+
 // Source queries
 
 const queryLinksSource = async (graph, source) => {
@@ -94,6 +99,7 @@ module.exports = {
   dumpLinks,
   addLink,
   removeLink,
+  getLinksForGraph,
   queryLinksSource,
   queryLinksPredicate,
   queryLinksTarget,

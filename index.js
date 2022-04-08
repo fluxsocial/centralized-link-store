@@ -63,6 +63,10 @@ app.post('/getLinks', async (request, response) => {
     if (query["target"] && !query["source"] && !query["predicate"]) {
         links = await db.queryLinksTarget(query["graph"], query["target"])
     }
+
+    if (!query["source"] && !query["predicate"] && !query["target"]) {
+        links = await db.getLinksForGraph(query["graph"])
+    }
     
     links = links.map((link) => link.link_expression);
     //filter results with from & until dates
