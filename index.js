@@ -115,7 +115,7 @@ app.post('/addLink', (request, response) => {
     let signalConnections = websockets.connections.filter(connection => connection.graph === link["graph"])
     db.addLink(link);
     signalConnections.forEach(connection => {
-        console.log("emitting message to", connection);
+        console.log("emitting message to", connection["socket"].id);
         connection["socket"].emit("linkAdded", link);
     })
     return response.status(200).json({"status": "Link Added"})
