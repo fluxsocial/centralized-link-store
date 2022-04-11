@@ -1,40 +1,36 @@
 const WebSocket = require("ws");
 const queryString = require("query-string");
+const { Server } = require("socket.io");
+
+const socketServer = (server) => {
+  const io = new Server(server);
+
+  io.on('connection', (socket) => {
+    console.log('a user connected', socket);
+
+      // when socket disconnects, remove it from the list:
+      socket.on("disconnect", () => {
+          //Delete socket instance
+          let foundConnections = connections.filter(connection => connection.socket === socket);
+          foundConnections.forEach(function(element) {
+            var index = connections.indexOf(element)
+            connections.splice(index, 1)
+          })
+          console.info(`Client disconnected, removed from connections [id=${socket.id}]`);
+      });
+
+    socket.on("connectSignal", (data) => {
+      console.log("Requested to connect to signals on", data);
+      if (data["graph"]) {
+        connections.push({"graph": data["graph"], "socket": socket})
+      }
+    })
+  });
+}
 
 const connections = [];
 
-const websocket = (expressServer) => {
-  const websocketServer = new WebSocket.Server({
-    noServer: true,
-    path: "/signals",
-  });
-
-  expressServer.on("upgrade", (request, socket, head) => {
-    websocketServer.handleUpgrade(request, socket, head, (websocket) => {
-      websocketServer.emit("connection", websocket, request);
-    });
-  });
-
-  websocketServer.on(
-    "connection",
-    function connection(websocketConnection, connectionRequest) {
-      const [path, params] = connectionRequest?.url?.split("?");
-      const connectionParams = queryString.parse(params);
-      if (path === "/signals" && connectionParams["graph"]) {
-        console.log("New Signal connection")
-        connections.push({"connection": websocketConnection, "graph": connectionParams["graph"]})
-      }
-
-      websocketConnection.on("message", (message) => {
-        websocketConnection.send(JSON.stringify({ status: 'CONNECTED' }));
-      });
-    }
-  );
-
-  return websocketServer;
-};
-
 module.exports = {
-  websocket,
+  socketServer,
   connections
 }

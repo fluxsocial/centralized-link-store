@@ -18,7 +18,7 @@ const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}\n\n`);
 });
 
-websockets.websocket(server);
+websockets.socketServer(server);
 
 process.on("message", (message) => {
     console.log(message);
@@ -115,7 +115,8 @@ app.post('/addLink', (request, response) => {
     let signalConnections = websockets.connections.filter(connection => connection.graph === link["graph"])
     db.addLink(link);
     signalConnections.forEach(connection => {
-        connection["connection"].send(JSON.stringify(link));
+        console.log("emitting message to", connection);
+        connection["socket"].emit("linkAdded", link);
     })
     return response.status(200).json({"status": "Link Added"})
 })
