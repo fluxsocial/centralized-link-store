@@ -29,10 +29,6 @@ app.get('/', (request, response) => {
     return response.status(200).json({"status": "ok"})
 })
 
-app.get('/dump', (request, response) => {
-    return db.dumpLinks(request, response)
-})
-
 app.post('/getLinks', async (request, response) => {
     console.log("GetLinks link request");
     let query = request.body;
