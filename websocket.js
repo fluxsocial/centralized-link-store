@@ -6,7 +6,7 @@ const socketServer = (server) => {
   const io = new Server(server);
 
   io.on('connection', (socket) => {
-    console.log('a user connected', socket);
+    console.log('a user connected', socket.id);
 
       // when socket disconnects, remove it from the list:
       socket.on("disconnect", () => {
