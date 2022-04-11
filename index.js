@@ -18,6 +18,7 @@ const server = app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}\n\n`);
 });
 
+console.log("Attaching socket.io server...")
 websockets.socketServer(server);
 
 process.on("message", (message) => {
