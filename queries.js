@@ -19,6 +19,9 @@ const dumpLinks = (request, response) => {
 const addLink = (linkExpression) => {
   const clone = JSON.parse(JSON.stringify(linkExpression))
   delete linkExpression["graph"];
+  if (!linkExpression["data"]["predicate"]) {
+    linkExpression["data"]["predicate"] = null;
+  }
   pool.query(`INSERT INTO ${process.env.table}(source, predicate, target, graph, timestamp, link_expression) VALUES ($1, $2, $3, $4, $5, $6)`, 
     [
       linkExpression["data"]["source"],
